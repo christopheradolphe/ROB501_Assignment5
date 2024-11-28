@@ -2,7 +2,7 @@ import torch
 import torch.utils.data
 import numpy as np
 import scipy.io as sio
-from sun_cnn import CNN, dataloader
+from sun_cnn_45 import CNN, dataloader
 
 '''
 Initialize the Network

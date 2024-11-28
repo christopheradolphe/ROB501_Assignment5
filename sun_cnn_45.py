@@ -20,19 +20,19 @@ class CNN(torch.nn.Module):
         super(CNN, self).__init__()
         
         ### Initialize the various Network Layers
-        self.conv1 = torch.nn.Conv2d(3, 16, stride=4, kernel_size=(9,9)) # 3 input channels, 16 output channels
-        self.bn1 = torch.nn.BatchNorm2d(16)
+        self.conv1 = torch.nn.Conv2d(3, 32, stride=4, kernel_size=(9,9)) # 3 input channels, 16 output channels
+        self.bn1 = torch.nn.BatchNorm2d(32)
         self.pool1 = torch.nn.MaxPool2d((3,3),stride=3)
         self.relu = torch.nn.ReLU()
         self.dropout1 = torch.nn.Dropout(p=0.3)
 
 
-        self.conv2 = torch.nn.Conv2d(16,32, kernel_size=(5,5), stride=1, padding=2)
-        self.bn2 = torch.nn.BatchNorm2d(32)
+        self.conv2 = torch.nn.Conv2d(32,16, kernel_size=(5,5), stride=1, padding=2)
+        self.bn2 = torch.nn.BatchNorm2d(16)
         self.pool2 = torch.nn.MaxPool2d((3,3), stride=1)
         self.dropout2 = torch.nn.Dropout(p=0.3)
 
-        self.conv3 = torch.nn.Conv2d(32, num_bins, kernel_size=(3,16))  # Adjusting dimensions for the final layer
+        self.conv3 = torch.nn.Conv2d(16, num_bins, kernel_size=(3,16))  # Adjusting dimensions for the final layer
         self.dropout3 = torch.nn.Dropout(p=0.3)
 
         if use_cuda_if_available and torch.cuda.is_available():

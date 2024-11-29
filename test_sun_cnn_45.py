@@ -15,7 +15,7 @@ cnn.load_state_dict(torch.load('best_model_{}.pth'.format(binsize)))
 
 
 dsets = {x: dataloader('{}.mat'.format(x),binsize=binsize, mode='test') for x in ['test']} 
-dset_loaders = {x: torch.utils.data.DataLoader(dsets[x], batch_size=50, shuffle=False, num_workers=4) for x in ['test']}
+dset_loaders = {x: torch.utils.data.DataLoader(dsets[x], batch_size=50, shuffle=False, num_workers=0) for x in ['test']}
 
 pred_list = np.zeros((0))
 top1_incorrect = 0

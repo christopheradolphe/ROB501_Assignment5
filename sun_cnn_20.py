@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
+"""
+Algorithm Modifications (compared to 45-degree bins):
+1. Increased network depth by adding fully connected layers after the third convolutional layer.
+2. Reduced the learning rate to 1e-4.
+"""
+
 ### set a random seed for reproducibility (do not change this)
 seed = 42
 np.random.seed(seed)
@@ -20,24 +26,35 @@ class CNN(torch.nn.Module):
         super(CNN, self).__init__()
         
         ### Initialize the various Network Layers
+        # Layer 1 : Convolutional Layer
         self.conv1 = torch.nn.Conv2d(3, 32, stride=4, kernel_size=(9,9)) # 3 input channels, 16 output channels
+        # Batch Normalize First Layer
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.pool1 = torch.nn.MaxPool2d((3,3),stride=3)
         self.relu = torch.nn.ReLU()
+        # Add dropout 
         self.dropout1 = torch.nn.Dropout(p=0.3)
 
-
+        # Layer 2 : Convolutional Layer
+        # Add an extra convolutional layer
         self.conv2 = torch.nn.Conv2d(32,16, kernel_size=(5,5), stride=1, padding=2)
+        # Batch Normalize Second Layer
         self.bn2 = torch.nn.BatchNorm2d(16)
+        # Implement Max Pool on second layer with decreased stride
         self.pool2 = torch.nn.MaxPool2d((3,3), stride=1)
         self.relu = torch.nn.ReLU()
+        # Add dropout
         self.dropout2 = torch.nn.Dropout(p=0.3)
 
+        # Layer 3 : Convolutional Layer
         self.conv3 = torch.nn.Conv2d(16, num_bins, kernel_size=(2,2))  # Adjusting dimensions for the final layer
+        # Implement dropout for third layer
         self.dropout3 = torch.nn.Dropout(p=0.3)
 
-        # Fully connected layers
+        # Layer 4,5 : Linear Layers
+        # Add fully connected linear layers
         self.fc1 = torch.nn.Linear(540, 128)  # Flattened size from conv3 to fc1
+        # Add dropout
         self.dropout4 = torch.nn.Dropout(p=0.5)
         self.fc2 = torch.nn.Linear(128, num_bins)
 
@@ -46,14 +63,14 @@ class CNN(torch.nn.Module):
 
     ###Define what the forward pass through the network is
     def forward(self, x):
-        # First Block
+        # First Convolutional Layer
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.pool1(x)
         x = self.relu(x)
         x = self.dropout1(x)
 
-        # Second Block
+        # Second Convolutional Layer
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.pool2(x)
@@ -97,7 +114,9 @@ class dataloader(torch.utils.data.Dataset):
             self.targets = (np.digitize(self.azimuth,bin_edges) -1).reshape((-1))
 
     def normalize_to_zero_mean(self):
+        # Find mean of each channel across all images
         self.mean = np.mean(self.images, axis=(0, 1, 2))  
+        # Subtract mean from each image to normalize dataset
         self.images = self.images - self.mean
 
     def __len__(self):
@@ -132,6 +151,7 @@ if __name__ == "__main__":
     
     CE_loss = torch.nn.CrossEntropyLoss(reduction='sum') #initialize our loss (specifying that the output as a sum of all sample losses)
     params = list(cnn.parameters())
+    # Decrease Learning Rate to 1e-4
     optimizer = torch.optim.Adam(params, lr=1e-4, weight_decay=0.0) #initialize our optimizer (Adam, an alternative to stochastic gradient descent)
     
     ### Initialize our dataloader for the training and validation set (specifying minibatch size of 128)
@@ -144,7 +164,8 @@ if __name__ == "__main__":
     best_err = 1
     
     ### Iterate through the data for the desired number of epochs
-    for epoch in range(0,40):
+    # Train for 30 epochs
+    for epoch in range(0,30):
         for mode in ['train', 'val']:    #iterate 
             epoch_loss=0
             top1_incorrect = 0

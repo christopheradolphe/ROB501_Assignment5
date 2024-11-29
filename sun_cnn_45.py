@@ -30,6 +30,7 @@ class CNN(torch.nn.Module):
         self.conv2 = torch.nn.Conv2d(32,16, kernel_size=(5,5), stride=1, padding=2)
         self.bn2 = torch.nn.BatchNorm2d(16)
         self.pool2 = torch.nn.MaxPool2d((3,3), stride=1)
+        self.relu = torch.nn.ReLU()
         self.dropout2 = torch.nn.Dropout(p=0.3)
 
         self.conv3 = torch.nn.Conv2d(16, num_bins, kernel_size=(3,16))  # Adjusting dimensions for the final layer
@@ -84,7 +85,7 @@ class dataloader(torch.utils.data.Dataset):
             self.targets = (np.digitize(self.azimuth,bin_edges) -1).reshape((-1))
 
     def normalize_to_zero_mean(self):
-        self.mean = np.mean(self.images)
+        self.mean = np.mean(self.images, axis=(0, 1, 2))  
         self.images = self.images - self.mean
 
     def __len__(self):
